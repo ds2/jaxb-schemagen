@@ -1,0 +1,10 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>ds2.oss.maven.plugins</groupId>
+    <artifactId>schemagen-project</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>schemagen-maven-plugin</artifactId>
+  <packaging>maven-plugin</packaging>
+</project>
