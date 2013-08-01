@@ -9,7 +9,7 @@
   <groupId>ds2.oss.maven.plugins</groupId>
   <artifactId>schemagen-project</artifactId>
   <packaging>pom</packaging>
-  <name>DS/2 OSS Maven Plugins JAXB SchemaGen</name>
+  <name>DS/2 OSS Maven Plugins JAXB SchemaGen Project</name>
   <version>0.1-SNAPSHOT</version>
   <properties>
     <siteProjectName>ds2Schemagen</siteProjectName>
