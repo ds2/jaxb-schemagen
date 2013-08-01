@@ -3,7 +3,7 @@
   <parent>
     <artifactId>jee-base</artifactId>
     <groupId>ds2.base.oss</groupId>
-    <version>0.78</version>
+    <version>0.79</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>ds2.oss.maven.plugins</groupId>
@@ -15,12 +15,10 @@
     <siteProjectName>ds2Schemagen</siteProjectName>
     <issueTrackerId>SCHEMAGEN</issueTrackerId>
     <license.header.author>Dirk Strauss</license.header.author>
-    <license.header.email>dstrauss@ds-2.de</license.header.email>
     <license.header.year>2013</license.header.year>
     <license.id>asl_v2</license.id>
     <license.header.projectName>DS/2 OSS Schemagen</license.header.projectName>
     <mvn.releaseplugin.version>2.3.2</mvn.releaseplugin.version>
-    <changesVia>jira</changesVia>
   </properties>
   <distributionManagement>
     <site>
