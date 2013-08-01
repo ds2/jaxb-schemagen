@@ -44,6 +44,8 @@ public class SchemaGenMojo extends AbstractMojo {
    */
   @Parameter(required = true, alias = "classNames",property = "schemagen.classNames")
   private Set<String> classNames;
+  @Parameter(required = true)
+  private Set<NamespaceFilenameDto> namespaces;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -54,7 +56,7 @@ public class SchemaGenMojo extends AbstractMojo {
     }
     try {
       JAXBContext ctx = JAXBContext.newInstance(foundClasses);
-      SchemaOutputResolver sor=null;
+      SchemaGenResolver sor=new SchemaGenResolver();
       ctx.generateSchema(sor);
     } catch (JAXBException e) {
       throw new MojoExecutionException("Error when generating the JAXB context!", e);
