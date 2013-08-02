@@ -45,6 +45,7 @@
   </issueManagement>
   <modules>
     <module>schemagen-maven-plugin</module>
+    <module>test</module>
   </modules>
   <profiles>
     <profile>

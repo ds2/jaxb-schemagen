@@ -15,13 +15,14 @@
  */
 package ds2.oss.maven.plugins.schemagen.plugin.impl;
 
-import javax.xml.bind.SchemaOutputResolver;
-import javax.xml.transform.Result;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import javax.xml.bind.SchemaOutputResolver;
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Our schema gen resolver.
@@ -46,5 +47,18 @@ public class SchemaGenResolver extends SchemaOutputResolver{
 
   public Map<String, File> getNsMap() {
     return nsMap;
+  }
+
+  void addNamespaces(Set<NamespaceFilenameDto> namespaces) {
+    if(namespaces==null||namespaces.isEmpty()){
+      return;
+    }
+    for(NamespaceFilenameDto d : namespaces){
+      String fileName=d.getFilename();
+      if(!fileName.toLowerCase().endsWith(".xsd")){
+        fileName+=".xsd";
+      }
+      nsMap.put(d.getNamespace().toString(), new File(fileName));
+    }
   }
 }

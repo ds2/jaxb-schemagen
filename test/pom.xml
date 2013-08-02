@@ -1,0 +1,41 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>ds2.oss.maven.plugins</groupId>
+    <artifactId>schemagen-project</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>schemagen-test</artifactId>
+  <packaging>jar</packaging>
+  <name>DS/2 OSS Maven Plugins SchemaGen Test</name>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>ds2.oss.maven.plugins</groupId>
+        <artifactId>schemagen-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+          <classNames>
+            <className>ds2.oss.maven.plugins.schemagen.test.TestDto</className>
+          </classNames>
+          <namespaces>
+            <namespace>
+              <namespace>http://www.ds2/ns/maven/plugins/schemagen/test</namespace>
+              <filename>schemagen-1</filename>
+            </namespace>
+          </namespaces>
+        </configuration>
+        <executions>
+          <execution>
+            <id>createXsds</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+          
+      </plugin>
+    </plugins>
+  </build>
+</project>
