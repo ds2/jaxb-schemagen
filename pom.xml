@@ -3,7 +3,7 @@
   <parent>
     <artifactId>jee-base</artifactId>
     <groupId>ds2.base.oss</groupId>
-    <version>0.78</version>
+    <version>0.80</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>ds2.oss.maven.plugins</groupId>
@@ -83,4 +83,5 @@
       </pluginRepositories>
     </profile>
   </profiles>
+  <description>The project base for the schemagen maven plugin.</description>
 </project>
