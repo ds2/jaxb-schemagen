@@ -1,6 +1,13 @@
-.*
-target
 bin
-*.iml
+build
+target
+.*
 *~
-nbproject
+*.orig
+nbactions.xml
+test-output
+*.iml
+*.NavData
+local.properties
+.DS_Store
+s101plugin.*
