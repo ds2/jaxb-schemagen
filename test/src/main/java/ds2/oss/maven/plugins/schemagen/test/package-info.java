@@ -19,5 +19,4 @@
 @XmlSchema(namespace = "http://www.ds2/ns/maven/plugins/schemagen/test")
 package ds2.oss.maven.plugins.schemagen.test;
 
-import javax.xml.bind.annotation.XmlNs;
 import javax.xml.bind.annotation.XmlSchema;
