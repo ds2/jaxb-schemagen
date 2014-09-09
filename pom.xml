@@ -3,7 +3,7 @@
   <parent>
     <artifactId>jee-base</artifactId>
     <groupId>ds2.base.oss</groupId>
-    <version>0.80</version>
+    <version>0.81</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>ds2.oss.maven.plugins</groupId>
