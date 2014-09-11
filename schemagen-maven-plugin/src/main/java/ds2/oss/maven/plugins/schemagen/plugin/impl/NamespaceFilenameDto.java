@@ -57,4 +57,12 @@ public class NamespaceFilenameDto {
   }
 
   private String filename;
+
+    @Override
+    public String toString() {
+        return "NamespaceFilenameDto{" + "namespace=" + namespace + ", filename=" + filename + '}';
+    }
+  
+  
+  
 }

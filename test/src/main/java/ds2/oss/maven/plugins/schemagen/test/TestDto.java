@@ -15,11 +15,22 @@
  */
 package ds2.oss.maven.plugins.schemagen.test;
 
+import java.net.URL;
+import java.util.Date;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Created by dstrauss on 02.08.13.
  */
 @XmlRootElement(name="test")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class TestDto {
+    @XmlAttribute(required = true)
+    private long id;
+    private String name;
+    private URL homepage;
+    private Date created;
 }
