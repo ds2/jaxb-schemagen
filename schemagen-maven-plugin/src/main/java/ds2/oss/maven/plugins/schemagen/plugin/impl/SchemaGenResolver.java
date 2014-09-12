@@ -17,48 +17,61 @@ package ds2.oss.maven.plugins.schemagen.plugin.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Our schema gen resolver.
+ *
  * @author dstrauss
- * @version  0.1
+ * @version 0.1
  */
-public class SchemaGenResolver extends SchemaOutputResolver{
-  private Map<String,File> nsMap;
+public class SchemaGenResolver extends SchemaOutputResolver {
 
-  public SchemaGenResolver(){
-    super();
-    nsMap=new HashMap<>();
-  }
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    /**
+     * The namespace map.
+     */
+    private final Map<String, File> nsMap;
 
-  @Override
-  public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
-    File file = new File(suggestedFileName);
-    StreamResult result = new StreamResult(file);
-    result.setSystemId(file.toURI().toURL().toString());
-    return result;
-  }
-
-  public Map<String, File> getNsMap() {
-    return nsMap;
-  }
-
-  void addNamespaces(Set<NamespaceFilenameDto> namespaces) {
-    if(namespaces==null||namespaces.isEmpty()){
-      return;
+    public SchemaGenResolver() {
+        super();
+        nsMap = new HashMap<>();
     }
-    for(NamespaceFilenameDto d : namespaces){
-      String fileName=d.getFilename();
-      if(!fileName.toLowerCase().endsWith(".xsd")){
-        fileName+=".xsd";
-      }
-      nsMap.put(d.getNamespace().toString(), new File(fileName));
+
+    @Override
+    public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
+        File file=nsMap.get(namespaceUri);
+        if(file==null){
+            file=new File(suggestedFileName);
+        }
+        LOG.info("NS {} will get File {}", new Object[]{namespaceUri, file});
+        StreamResult result = new StreamResult(file);
+        result.setSystemId(file.toURI().toURL().toString());
+        return result;
     }
-  }
+
+    public Map<String, File> getNsMap() {
+        return nsMap;
+    }
+
+    void addNamespaces(Set<NamespaceFilenameDto> namespaces) {
+        if (namespaces == null || namespaces.isEmpty()) {
+            return;
+        }
+        for (NamespaceFilenameDto d : namespaces) {
+            String fileName = d.getFilename();
+            if (!fileName.toLowerCase().endsWith(".xsd")) {
+                fileName += ".xsd";
+            }
+            nsMap.put(d.getNamespace().toString(), new File(fileName));
+        }
+    }
 }
