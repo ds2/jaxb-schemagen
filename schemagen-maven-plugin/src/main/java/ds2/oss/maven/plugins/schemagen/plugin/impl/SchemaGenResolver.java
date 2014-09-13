@@ -18,12 +18,15 @@ package ds2.oss.maven.plugins.schemagen.plugin.impl;
 import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,35 +37,59 @@ import org.slf4j.LoggerFactory;
  * @version 0.1
  */
 public class SchemaGenResolver extends SchemaOutputResolver {
-
+    /**
+     * A logger.
+     */
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     /**
      * The namespace map.
      */
     private final Map<String, File> nsMap;
-
-    public SchemaGenResolver() {
+    /**
+     * The base directory.
+     */
+    private Path baseDirectory;
+    
+    /**
+     * Inits the resolver.
+     * 
+     * @param base
+     *            the base directory to use
+     */
+    public SchemaGenResolver(final Path base) {
         super();
         nsMap = new HashMap<>();
+        baseDirectory = base;
     }
-
+    
     @Override
-    public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
-        File file=nsMap.get(namespaceUri);
-        if(file==null){
-            file=new File(suggestedFileName);
+    public Result createOutput(final String namespaceUri, final String suggestedFileName) throws IOException {
+        File file = nsMap.get(namespaceUri);
+        if (file == null) {
+            file = new File(suggestedFileName);
         }
-        LOG.info("NS {} will get File {}", new Object[]{namespaceUri, file});
-        StreamResult result = new StreamResult(file);
+        LOG.debug("NS {} will get File {}", new Object[] { namespaceUri, file });
+        final StreamResult result = new StreamResult(file);
         result.setSystemId(file.toURI().toURL().toString());
         return result;
     }
-
+    
+    /**
+     * Returns the current namespace map.
+     * 
+     * @return the namespace map
+     */
     public Map<String, File> getNsMap() {
         return nsMap;
     }
-
-    void addNamespaces(Set<NamespaceFilenameDto> namespaces) {
+    
+    /**
+     * Adds some new namespace data.
+     * 
+     * @param namespaces
+     *            the namespace data
+     */
+    public void addNamespaces(final Set<NamespaceFilenameDto> namespaces) {
         if (namespaces == null || namespaces.isEmpty()) {
             return;
         }
@@ -71,7 +98,9 @@ public class SchemaGenResolver extends SchemaOutputResolver {
             if (!fileName.toLowerCase().endsWith(".xsd")) {
                 fileName += ".xsd";
             }
-            nsMap.put(d.getNamespace().toString(), new File(fileName));
+            final Path filePath = baseDirectory.resolve(fileName).normalize();
+            LOG.debug("Namespace {} configured to be put into {}", new Object[] { d.getNamespace(), filePath });
+            nsMap.put(d.getNamespace().toString(), filePath.toFile());
         }
     }
 }

@@ -18,51 +18,64 @@ package ds2.oss.maven.plugins.schemagen.plugin.impl;
 import java.net.URI;
 
 /**
- * Created by dstrauss on 01.08.13.
+ * The dto.
+ * 
+ * @author dstrauss
+ * @version 0.1
  */
 public class NamespaceFilenameDto {
-  private URI namespace;
-
-  public URI getNamespace() {
-    return namespace;
-  }
-
-  public void setNamespace(URI namespace) {
-    this.namespace = namespace;
-  }
-
-  public String getFilename() {
-    return filename;
-  }
-
-  public void setFilename(String filename) {
-    this.filename = filename;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof NamespaceFilenameDto)) return false;
-
-    NamespaceFilenameDto that = (NamespaceFilenameDto) o;
-
-    if (!namespace.equals(that.namespace)) return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return namespace.hashCode();
-  }
-
-  private String filename;
-
+    /**
+     * The filename.
+     */
+    private String filename;
+    
+    /**
+     * The namespace.
+     */
+    private URI namespace;
+    
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof NamespaceFilenameDto)) {
+            return false;
+        }
+        
+        final NamespaceFilenameDto that = (NamespaceFilenameDto) o;
+        
+        if (!namespace.equals(that.namespace)) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public String getFilename() {
+        return filename;
+    }
+    
+    public URI getNamespace() {
+        return namespace;
+    }
+    
+    @Override
+    public int hashCode() {
+        return namespace.hashCode();
+    }
+    
+    public void setFilename(final String filename) {
+        this.filename = filename;
+    }
+    
+    public void setNamespace(final URI namespace) {
+        this.namespace = namespace;
+    }
+    
     @Override
     public String toString() {
         return "NamespaceFilenameDto{" + "namespace=" + namespace + ", filename=" + filename + '}';
     }
-  
-  
-  
+    
 }

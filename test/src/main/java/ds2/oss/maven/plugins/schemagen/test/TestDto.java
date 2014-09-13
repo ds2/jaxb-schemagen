@@ -17,20 +17,36 @@ package ds2.oss.maven.plugins.schemagen.test;
 
 import java.net.URL;
 import java.util.Date;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Created by dstrauss on 02.08.13.
+ * Dummy dto object.
+ * 
+ * @author dstrauss
+ * @version 0.1
  */
-@XmlRootElement(name="test")
+@XmlRootElement(name = "test")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TestDto {
+    /**
+     * Dummy id.
+     */
     @XmlAttribute(required = true)
     private long id;
+    /**
+     * Dummy name.
+     */
     private String name;
+    /**
+     * Dummy homepage url.
+     */
     private URL homepage;
+    /**
+     * Dummy date object.
+     */
     private Date created;
 }

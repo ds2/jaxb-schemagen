@@ -24,9 +24,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -45,26 +48,47 @@ import org.codehaus.plexus.classworlds.realm.ClassRealm;
  * @author dstrauss
  * @version 0.1
  */
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
+@Mojo(
+    name = "generate",
+    defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+    requiresDependencyResolution = ResolutionScope.RUNTIME,
+    threadSafe = true)
 public class SchemaGenMojo extends AbstractMojo {
-
+    
     /**
-     * The list of classes.
+     * The list of classes to scan for JAXB annotations.
      */
     @Parameter(required = true)
     private Set<String> classNames;
+    /**
+     * This set contains the configuration for all found namespaces, and where to put them into
+     * which XSD.
+     */
     @Parameter(required = true)
     private Set<NamespaceFilenameDto> namespaces;
-    @Parameter(defaultValue = "${project.build.directory}")
+    /**
+     * The target directory to generate the XSDs into.
+     */
+    @Parameter(defaultValue = "${project.build.directory}/generated-sources/xsd")
     private File buildDirectory;
+    /**
+     * The plugin descriptor.
+     * 
+     * @parameter name="${plugin}" @readonly
+     */
     @Component
     private PluginDescriptor pluginDescr;
+    /**
+     * The current maven project where this plugin gets executed.
+     * 
+     * @parameter name="${project}" @readonly
+     */
     @Component
     private MavenProject project;
     
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info("Target is " + buildDirectory);
+        getLog().debug("Target is " + buildDirectory);
         if (pluginDescr != null) {
             getLog().info("PD exists");
         }
@@ -76,11 +100,16 @@ public class SchemaGenMojo extends AbstractMojo {
                 return;
             }
             JAXBContext ctx = JAXBContext.newInstance(foundClasses);
-            SchemaGenResolver sor = new SchemaGenResolver();
+            buildDirectory.mkdirs();
+            SchemaGenResolver sor = new SchemaGenResolver(buildDirectory.toPath());
             getLog().info("NS: " + namespaces);
             sor.addNamespaces(namespaces);
             ctx.generateSchema(sor);
-            getLog().info("done");
+            getLog().info("XSDs have been generated in " + buildDirectory);
+            Resource res = new Resource();
+            res.setDirectory(buildDirectory.toString());
+            res.setTargetPath("target/classes");
+            project.addResource(res);
         } catch (JAXBException e) {
             throw new MojoExecutionException("Error when generating the JAXB context!", e);
         } catch (IOException e) {
@@ -90,40 +119,38 @@ public class SchemaGenMojo extends AbstractMojo {
         }
     }
     
+    /**
+     * Returns all found classes.
+     * 
+     * @param fileList
+     *            a set of FQCN
+     * @return the loaded classes
+     * @throws DependencyResolutionRequiredException
+     *             if we were unable to load all deps
+     */
     private Class<?>[] parseFileList(Set<String> fileList) throws DependencyResolutionRequiredException {
-        URLClassLoader ucl;
         List<Class<?>> rc = new ArrayList<>();
+        ClassLoader cl = createClassLoader();
         if (fileList != null && !fileList.isEmpty()) {
             for (String classFile : fileList) {
                 getLog().info("Trying to load class " + classFile);
-                ClassLoader cl = createClassLoader();
                 try {
                     Class<?> foundClass = cl.loadClass(classFile);
                     rc.add(foundClass);
                 } catch (ClassNotFoundException e) {
                     getLog().warn("Cannot load class " + classFile, e);
-                    testClassLoaders(classFile);
                 }
             }
         }
         return rc.toArray(new Class<?>[0]);
     }
     
-    private void testClassLoaders(String c) throws DependencyResolutionRequiredException {
-        ClassLoader ucl = createClassLoader();
-        try {
-            ucl.loadClass(c);
-            getLog().info("Found " + c + " in UCL");
-        } catch (ClassNotFoundException e) {
-            getLog().error("No", e);
-        }
-    }
-
     /**
      * Creates the classloader for this run.
      *
      * @return the classloader to use
      * @throws DependencyResolutionRequiredException
+     *             if we could not properly resolve the runtime classpath
      */
     private ClassLoader createClassLoader() throws DependencyResolutionRequiredException {
         List<String> runtimeClasspathElements = project.getRuntimeClasspathElements();
@@ -140,7 +167,8 @@ public class SchemaGenMojo extends AbstractMojo {
                 getLog().warn(ex);
             }
         });
-        URLClassLoader ucl = new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
+        URLClassLoader ucl =
+            new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
         return ucl;
     }
 }
