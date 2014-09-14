@@ -108,8 +108,9 @@ public class SchemaGenMojo extends AbstractMojo {
             getLog().info("XSDs have been generated in " + buildDirectory);
             Resource res = new Resource();
             res.setDirectory(buildDirectory.toString());
-            res.setTargetPath("target/classes");
+            // res.setTargetPath("target/classes");
             project.addResource(res);
+            project.addCompileSourceRoot(buildDirectory.toString());
         } catch (JAXBException e) {
             throw new MojoExecutionException("Error when generating the JAXB context!", e);
         } catch (IOException e) {
