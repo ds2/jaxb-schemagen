@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,9 +41,12 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
+import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
  * The schemagen mojo.
@@ -92,6 +96,13 @@ public class SchemaGenMojo extends AbstractMojo {
      */
     @Component
     private MavenProject project;
+    @Component
+    private MavenProjectHelper helper;
+    /**
+     * The build context.
+     */
+    @Component
+    private BuildContext buildCtx;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -107,15 +118,19 @@ public class SchemaGenMojo extends AbstractMojo {
                 return;
             }
             JAXBContext ctx = JAXBContext.newInstance(foundClasses);
-            buildDirectory.mkdirs();
+            FileUtils.mkdir(buildDirectory.getAbsolutePath());
+            //buildDirectory.mkdirs();
             SchemaGenResolver sor = new SchemaGenResolver(buildDirectory.toPath());
             LOG.debug("NS: {}", namespaces);
             sor.addNamespaces(namespaces);
             ctx.generateSchema(sor);
             LOG.info("XSDs have been generated in {}", buildDirectory);
-            Resource res = new Resource();
-            res.setDirectory(buildDirectory.getAbsolutePath());
-            project.addResource(res);
+            //Resource res = new Resource();
+            //res.setDirectory(buildDirectory.getAbsolutePath());
+            //res.addInclude("*.xsd");
+            //project.addResource(res);
+            helper.addResource(project, buildDirectory.getAbsolutePath(), Arrays.asList("*.xsd"), null);
+            buildCtx.refresh(buildDirectory);
         } catch (JAXBException e) {
             throw new MojoExecutionException("Error when generating the JAXB context!", e);
         } catch (IOException e) {
@@ -161,7 +176,7 @@ public class SchemaGenMojo extends AbstractMojo {
      */
     private ClassLoader createClassLoader() throws DependencyResolutionRequiredException {
         List<String> runtimeClasspathElements = project.getRuntimeClasspathElements();
-        ClassRealm realm = pluginDescr.getClassRealm();
+        //ClassRealm realm = pluginDescr.getClassRealm();
         Set<URL> urls = new HashSet<>();
         runtimeClasspathElements.stream().forEach((element) -> {
             LOG.debug("runtime element: {}", element);
@@ -169,7 +184,7 @@ public class SchemaGenMojo extends AbstractMojo {
                 File f = new File(element);
                 URL elementUrl = f.toURI().toURL();
                 urls.add(elementUrl);
-                realm.addURL(elementUrl);
+                //realm.addURL(elementUrl);
             } catch (MalformedURLException ex) {
                 LOG.warn("Error when converting a file path to a URL.", ex);
             }
