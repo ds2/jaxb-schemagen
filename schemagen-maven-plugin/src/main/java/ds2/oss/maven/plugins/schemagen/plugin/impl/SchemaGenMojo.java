@@ -41,6 +41,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The schemagen mojo.
@@ -49,20 +51,25 @@ import org.codehaus.plexus.classworlds.realm.ClassRealm;
  * @version 0.1
  */
 @Mojo(
-    name = "generate",
-    defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-    requiresDependencyResolution = ResolutionScope.RUNTIME,
-    threadSafe = true)
+        name = "generate",
+        defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+        requiresDependencyResolution = ResolutionScope.RUNTIME,
+        threadSafe = true)
 public class SchemaGenMojo extends AbstractMojo {
-    
+
+    /**
+     * A logger.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(SchemaGenMojo.class);
+
     /**
      * The list of classes to scan for JAXB annotations.
      */
     @Parameter(required = true)
     private Set<String> classNames;
     /**
-     * This set contains the configuration for all found namespaces, and where to put them into
-     * which XSD.
+     * This set contains the configuration for all found namespaces, and where
+     * to put them into which XSD.
      */
     @Parameter(required = true)
     private Set<NamespaceFilenameDto> namespaces;
@@ -73,44 +80,42 @@ public class SchemaGenMojo extends AbstractMojo {
     private File buildDirectory;
     /**
      * The plugin descriptor.
-     * 
+     *
      * @parameter name="${plugin}" @readonly
      */
     @Component
     private PluginDescriptor pluginDescr;
     /**
      * The current maven project where this plugin gets executed.
-     * 
+     *
      * @parameter name="${project}" @readonly
      */
     @Component
     private MavenProject project;
-    
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().debug("Target is " + buildDirectory);
+        LOG.debug("Target is {}", buildDirectory);
         if (pluginDescr != null) {
-            getLog().info("PD exists");
+            LOG.debug("PD exists");
         }
-        
+
         try {
             Class<?> foundClasses[] = parseFileList(classNames);
             if (foundClasses == null || foundClasses.length <= 0) {
-                getLog().info("No classes found. Ignoring execution.");
+                LOG.warn("No classes found. Ignoring execution.");
                 return;
             }
             JAXBContext ctx = JAXBContext.newInstance(foundClasses);
             buildDirectory.mkdirs();
             SchemaGenResolver sor = new SchemaGenResolver(buildDirectory.toPath());
-            getLog().info("NS: " + namespaces);
+            LOG.debug("NS: {}", namespaces);
             sor.addNamespaces(namespaces);
             ctx.generateSchema(sor);
-            getLog().info("XSDs have been generated in " + buildDirectory);
+            LOG.info("XSDs have been generated in {}", buildDirectory);
             Resource res = new Resource();
-            res.setDirectory(buildDirectory.toString());
-            // res.setTargetPath("target/classes");
+            res.setDirectory(buildDirectory.getAbsolutePath());
             project.addResource(res);
-            project.addCompileSourceRoot(buildDirectory.toString());
         } catch (JAXBException e) {
             throw new MojoExecutionException("Error when generating the JAXB context!", e);
         } catch (IOException e) {
@@ -119,57 +124,58 @@ public class SchemaGenMojo extends AbstractMojo {
             throw new MojoExecutionException("Dep Resolution failed!", ex);
         }
     }
-    
+
     /**
      * Returns all found classes.
-     * 
-     * @param fileList
-     *            a set of FQCN
+     *
+     * @param fileList a set of FQCN
      * @return the loaded classes
-     * @throws DependencyResolutionRequiredException
-     *             if we were unable to load all deps
+     * @throws DependencyResolutionRequiredException if we were unable to load
+     * all deps
      */
     private Class<?>[] parseFileList(Set<String> fileList) throws DependencyResolutionRequiredException {
         List<Class<?>> rc = new ArrayList<>();
         ClassLoader cl = createClassLoader();
         if (fileList != null && !fileList.isEmpty()) {
-            for (String classFile : fileList) {
-                getLog().info("Trying to load class " + classFile);
+            fileList.stream().map((classFile) -> {
+                LOG.debug("Trying to load class {}", classFile);
+                return classFile;
+            }).forEach((classFile) -> {
                 try {
                     Class<?> foundClass = cl.loadClass(classFile);
                     rc.add(foundClass);
                 } catch (ClassNotFoundException e) {
-                    getLog().warn("Cannot load class " + classFile, e);
+                    LOG.warn("Cannot load class " + classFile, e);
                 }
-            }
+            });
         }
         return rc.toArray(new Class<?>[0]);
     }
-    
+
     /**
      * Creates the classloader for this run.
      *
      * @return the classloader to use
-     * @throws DependencyResolutionRequiredException
-     *             if we could not properly resolve the runtime classpath
+     * @throws DependencyResolutionRequiredException if we could not properly
+     * resolve the runtime classpath
      */
     private ClassLoader createClassLoader() throws DependencyResolutionRequiredException {
         List<String> runtimeClasspathElements = project.getRuntimeClasspathElements();
         ClassRealm realm = pluginDescr.getClassRealm();
         Set<URL> urls = new HashSet<>();
         runtimeClasspathElements.stream().forEach((element) -> {
-            getLog().info("runtime element: " + element);
+            LOG.debug("runtime element: {}", element);
             try {
                 File f = new File(element);
                 URL elementUrl = f.toURI().toURL();
                 urls.add(elementUrl);
                 realm.addURL(elementUrl);
             } catch (MalformedURLException ex) {
-                getLog().warn(ex);
+                LOG.warn("Error when converting a file path to a URL.", ex);
             }
         });
-        URLClassLoader ucl =
-            new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
+        URLClassLoader ucl
+                = new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
         return ucl;
     }
 }
