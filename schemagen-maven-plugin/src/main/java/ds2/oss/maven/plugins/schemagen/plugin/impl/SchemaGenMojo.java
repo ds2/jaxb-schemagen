@@ -30,7 +30,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -42,7 +41,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
-import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +79,7 @@ public class SchemaGenMojo extends AbstractMojo {
      * The target directory to generate the XSDs into.
      */
     @Parameter(defaultValue = "${project.build.directory}/generated-sources/xsd")
-    private File buildDirectory;
+    private File targetXsdDirectory;
     /**
      * The plugin descriptor.
      *
@@ -106,7 +104,7 @@ public class SchemaGenMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        LOG.debug("Target is {}", buildDirectory);
+        LOG.debug("Target is {}", targetXsdDirectory);
         if (pluginDescr != null) {
             LOG.debug("PD exists");
         }
@@ -118,19 +116,19 @@ public class SchemaGenMojo extends AbstractMojo {
                 return;
             }
             JAXBContext ctx = JAXBContext.newInstance(foundClasses);
-            FileUtils.mkdir(buildDirectory.getAbsolutePath());
+            FileUtils.mkdir(targetXsdDirectory.getAbsolutePath());
             //buildDirectory.mkdirs();
-            SchemaGenResolver sor = new SchemaGenResolver(buildDirectory.toPath());
+            SchemaGenResolver sor = new SchemaGenResolver(targetXsdDirectory.toPath());
             LOG.debug("NS: {}", namespaces);
             sor.addNamespaces(namespaces);
             ctx.generateSchema(sor);
-            LOG.info("XSDs have been generated in {}", buildDirectory);
+            LOG.info("XSDs have been generated in {}", targetXsdDirectory);
             //Resource res = new Resource();
             //res.setDirectory(buildDirectory.getAbsolutePath());
             //res.addInclude("*.xsd");
             //project.addResource(res);
-            helper.addResource(project, buildDirectory.getAbsolutePath(), Arrays.asList("*.xsd"), null);
-            buildCtx.refresh(buildDirectory);
+            helper.addResource(project, targetXsdDirectory.getAbsolutePath(), Arrays.asList("*.xsd"), null);
+            buildCtx.refresh(targetXsdDirectory);
         } catch (JAXBException e) {
             throw new MojoExecutionException("Error when generating the JAXB context!", e);
         } catch (IOException e) {

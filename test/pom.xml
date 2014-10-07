@@ -5,7 +5,6 @@
         <groupId>ds2.oss.maven.plugins</groupId>
         <artifactId>schemagen-project</artifactId>
         <version>0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>schemagen-test</artifactId>
     <packaging>jar</packaging>
@@ -26,6 +25,7 @@
                             <filename>schemagen-1</filename>
                         </namespace>
                     </namespaces>
+                    <targetXsdDirectory>${project.build.outputDirectory}</targetXsdDirectory>
                 </configuration>
                 <executions>
                     <execution>
