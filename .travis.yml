@@ -4,7 +4,6 @@ git:
 branches:
   only:
     - develop
+    - master
 jdk:
   - oraclejdk8
-#install:  mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Pno-repo-man
-#test: mvn test -B -Pno-repo-man
