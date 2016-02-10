@@ -30,6 +30,9 @@
                 <executions>
                     <execution>
                         <id>createXsds</id>
+                        <phase>
+                            compile
+                        </phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>

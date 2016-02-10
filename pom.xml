@@ -52,6 +52,9 @@
   <profiles>
     <profile>
       <id>no-repo-man</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <repositories>
         <repository>
           <id>commondatastorage.google.ds2</id>
