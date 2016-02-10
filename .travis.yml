@@ -6,7 +6,5 @@ branches:
     - develop
 jdk:
   - oraclejdk8
-#before_install: mvn clean -Pno-repo-man
-#install: mvn install -Pno-repo-man
-env:
-  - MAVEN_OPTS="-Pno-repo-man"
+install:  mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Pno-repo-man
+test: mvn test -B -Pno-repo-man
